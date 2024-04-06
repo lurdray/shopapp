@@ -219,8 +219,8 @@ def main(page: ft.Page):
                else:
                   #import json
                   headers = {"Content-Type": "application/json; charset=utf-8"}
-                  req = requests.post("https://shopowner.app/api/sign-in/", headers=headers, json={"email":emaill.value, "password":passwordd.value}, verify=True).json()
-                  
+                  req = requests.get(url="https://shopowner.app/api/sign-in/%s/%s/" % (emaill.value, passwordd.value)).json()
+                  print(emaill.value, passwordd.value)
                   if req != "Invalid login":
                      pass
                   else:
@@ -489,7 +489,7 @@ def main(page: ft.Page):
                page.update()
             
             else:
-               req = requests.post("https://shopowner.app/api/add/2/", data={"app_id":page.session.get("id"), "categoey":cat.value})
+               req = requests.post("https://shopowner.app/api/add/2/", data={"app_id":page.session.get("id"), "category":cat.value})
                page.go("/add-shop")
                page.update()
 
@@ -577,7 +577,7 @@ def main(page: ft.Page):
             )
          phone = ft.TextField(label="Phone Number", width=300, height=50, border_radius=15, prefix_icon=ft.icons.LOCAL_PHONE)
          map_link = ft.TextField(
-                  label="Google map link",
+                  label="Shop Address",
                   multiline=True,
                   min_lines=1,
                   max_lines=3,
@@ -595,9 +595,14 @@ def main(page: ft.Page):
 
 
          def handle_add_shop(e):
-            req = requests.post("https://shopowner.app/api/add/2/", data={"app_id":page.session.get("id"), "categoey":cat.value})
-            page.go("/dash")
-            page.update()
+            req = requests.get("https://shopowner.app/api/add-shop/%s/%s/%s/%s/%s/" % (page.session.get("id"), name.value, description.value, phone.value, map_link.value)).json()
+            print(req)
+            print({"app_id":page.session.get("id"), "name":name.value, "description":description.value, "phone":phone.value, "map_link":map_link.value})
+            if req == "Success!":
+               page.go("/dash")
+               page.update()
+            else:
+               notify("An error occurred.")
 
 
          back = ft.IconButton(
@@ -681,7 +686,7 @@ def main(page: ft.Page):
 
 
          def handle_add_shop(e):
-            req = requests.post("https://shopowner.app/api/add/2/", data={"app_id":page.session.get("id"), "categoey":cat.value})
+            req = requests.post("https://shopowner.app/api/add/2/", data={"app_id":page.session.get("id"), "category":cat.value})
             page.go("/dash")
             page.update()
 
