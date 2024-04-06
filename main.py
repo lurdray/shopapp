@@ -5,6 +5,33 @@ def main(page: ft.Page):
    page.title = "Shop Owner"
    page.theme_mode = ft.ThemeMode.LIGHT
 
+   def launch_help(e):
+      #page.launch_url(shop["google_map"])
+      page.launch_url("https://wa.me/+23490875678")
+
+   def changetab(e):
+      index = e.control.selected_index
+      print(index)
+      if index == 0:
+         page.go("/dash")
+      
+      elif index == 1:
+         page.go("/manage-my-shop")
+
+      elif index == 2:
+         launch_help(e)
+      
+      else:
+         pass
+
+   def notify(msg):
+      dlg = ft.AlertDialog(
+         title=ft.Text(msg)
+      )
+      page.dialog = dlg
+      dlg.open = True
+      page.update()
+
    
 
    def route_change(route):
@@ -152,6 +179,8 @@ def main(page: ft.Page):
 
                      ft.NavigationBar(
                         bgcolor=ft.colors.AMBER,
+                        selected_index = 0,
+                        on_change=changetab,
                         destinations=[
                            ft.NavigationDestination(icon=ft.icons.HOME, label="Home"),
                            ft.NavigationDestination(icon=ft.icons.APP_BLOCKING_ROUNDED, label="My Business"),
@@ -169,6 +198,101 @@ def main(page: ft.Page):
          )
       page.update()
       ################
+
+
+      #####################
+      if page.route == "/sign-in":
+            emaill = ft.TextField(label="Email Address..", width=300, height=50, border_radius=15, prefix_icon=ft.icons.EMAIL)
+            passwordd = ft.TextField(label="Password..", width=300, height=50, border_radius=15, password=True, prefix_icon=ft.icons.PASSWORD)
+
+            def handle_signin(e):
+               
+               emaill.error_text = ""
+               passwordd.error_text = ""
+               if not emaill.value:
+                  emaill.error_text = "missing email..."
+                  page.update()
+               elif not passwordd.value:
+                  passwordd.error_text = "missing password..."
+                  page.update()
+
+               else:
+                  #import json
+                  headers = {"Content-Type": "application/json; charset=utf-8"}
+                  req = requests.post("https://shopowner.app/api/sign-in/", headers=headers, json={"email":emaill.value, "password":passwordd.value}, verify=True).json()
+                  
+                  if req != "Invalid login":
+                     pass
+                  else:
+                     notify("Invalid login!")
+                  #req = json.loads(req)
+                  #print(req)
+                  
+                  #print(req["status"])
+                  #if req:
+                  #     ft.AlertDialog(
+                  #        title=ft.Text("Hey there!"), on_dismiss=lambda e: print("Close")
+                  #    )
+                        
+                  #else:
+                  print(req)
+                  page.session.set("id", req["id"])
+
+                  page.go("/dash")
+                  page.update()
+               
+            back = ft.IconButton(
+               icon=ft.icons.ARROW_BACK_IOS, on_click=lambda _: page.go("/")
+            )
+
+
+            page.views.append(
+                     ft.View(
+                        "/sign-in",
+                        [
+                        ft.Container(
+                           content=back,
+                           alignment=ft.alignment.top_left,
+                        ),
+
+                        #ft.SafeArea(ft.Switch(label="Dark Theme Mode", on_change=switch_theme_mode)),
+
+                        ft.Container(height=10),
+                        ft.Image(
+                           src="images/sign_up.svg",
+                           width=150,
+                           height=150,
+                           fit=ft.ImageFit.CONTAIN,
+                        ),
+                        ft.Container(height=5),
+                        ft.Text("Sign in", weight="bold", theme_style="titleLarge"),
+                        ft.Text("Help customers find you easily.", text_align="center"),
+
+                        ft.Container(height=5),
+                        emaill,
+                        passwordd,
+
+                        ft.Container(height=5),
+                        ft.ElevatedButton("Sign In", bgcolor="#FFC100", color="#161515", width="200", height="50", on_click=handle_signin),
+                        ft.TextButton(
+                           "I don't have an account.",
+                           icon="account_circle",
+                           icon_color="AMBER",
+                           on_click=lambda _: page.go("/sign-up")
+                        ),
+                        ft.Container(height=10),
+                  ],
+
+                     scroll="always",
+                     vertical_alignment="center",
+                     horizontal_alignment="center",
+                     padding=5,
+
+               )
+            )
+      page.update()
+
+      #######################
 
 
       #####################
@@ -191,7 +315,11 @@ def main(page: ft.Page):
                   #import json
                   headers = {"Content-Type": "application/json; charset=utf-8"}
                   req = requests.post("https://shopowner.app/api/sign-up/", headers=headers, json={"email":email.value, "password":password1.value}).json()
-                  print(req)
+                  
+                  if req != "Email Address already taken!":
+                     pass
+                  else:
+                     notify("Email Address already taken!")
                   #req = json.loads(req)
                   #print(req)
                   
@@ -296,13 +424,19 @@ def main(page: ft.Page):
                      )
 
             def handle_signup_finish(e):
-               req = requests.post("https://shopowner.app/api/add/1/", data={"app_id":page.session.get("id"), "market":dd.value})
-               print("the compiler is here.....")
-               #print(page.session.get("%s" % dd.value))
-               page.session.set("market_id", dd.value)
-               page.go("/sign-up-close")
-               #page.go(f"/sign-up-close/%s" % str(page.session.get("%s" % dd.value)))
-               page.update()
+               dd.error_text = ""
+               if not dd.value:
+                  dd.error_text = "Select one"
+                  page.update()
+               
+               else:
+                  req = requests.post("https://shopowner.app/api/add/1/", data={"app_id":page.session.get("id"), "market":dd.value})
+                  print("the compiler is here.....")
+                  #print(page.session.get("%s" % dd.value))
+                  page.session.set("market_id", dd.value)
+                  page.go("/sign-up-close")
+                  #page.go(f"/sign-up-close/%s" % str(page.session.get("%s" % dd.value)))
+                  page.update()
 
             back = ft.IconButton(
                icon=ft.icons.ARROW_BACK_IOS, on_click=lambda _: page.go("/sign-up")
@@ -350,9 +484,14 @@ def main(page: ft.Page):
       #####################
       if page.route == "/sign-up-close":
          def handle_signup_close(e):
-            req = requests.post("https://shopowner.app/api/add/2/", data={"app_id":page.session.get("id"), "categoey":cat.value})
-            page.go("/add-shop")
-            page.update()
+            if not cat.value:
+               cat.error_text = "Select one"
+               page.update()
+            
+            else:
+               req = requests.post("https://shopowner.app/api/add/2/", data={"app_id":page.session.get("id"), "categoey":cat.value})
+               page.go("/add-shop")
+               page.update()
 
             
          def get_categorys(market_id):
@@ -512,7 +651,7 @@ def main(page: ft.Page):
 
 
       #####################
-      if page.route == "/manage-shop":
+      if page.route == "/manage-my-shop":
          name = ft.TextField(label="Edit Name", width=300, height=50, border_radius=15, prefix_icon=ft.icons.BUSINESS_CENTER)
          description = ft.TextField(
                   label="Edit About Business",
@@ -737,6 +876,8 @@ def main(page: ft.Page):
 
                      ft.NavigationBar(
                         bgcolor=ft.colors.AMBER,
+                        selected_index = 0,
+                        on_change=changetab,
                         destinations=[
                            ft.NavigationDestination(icon=ft.icons.HOME, label="Home"),
                            ft.NavigationDestination(icon=ft.icons.APP_BLOCKING_ROUNDED, label="My Business"),
