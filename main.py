@@ -2,31 +2,56 @@ import flet as ft
 import requests
 
 def main(page: ft.Page):
-   page.title = "Shop Owner"
+   page.title = "Shop owner"
    page.theme_mode = ft.ThemeMode.LIGHT
+   page.window_width = 350        # window's width is 200 px
+   page.window_height = 650       # window's height is 200 px
+   page.window_resizable = False  # window is not resizable
+   page.update()
 
    def launch_help(e):
       #page.launch_url(shop["google_map"])
-      page.launch_url("https://wa.me/+23490875678")
+      page.launch_url("https://wa.me/+2348148737265")
 
    def changetab(e):
       index = e.control.selected_index
-      print(index)
+      print(" ")
+      print(" ")
+      print(" ")
+      print("-----⏳")
+      print("-----⏳")
+      print("-----⏳")
+      print("-----😃----- ✅✅✅✅✅✅✅✅✅✅✅✅ .....")
+      print("-----🤯----- The menue index is (%s) ....." % index)
       if index == 0:
          page.go("/dash")
       
       elif index == 1:
-         page.go("/manage-my-shop")
+         if page.session.get("id"):
+            page.go("/manage-my-shop")
+         else:
+            notify("You're not signed in")
+            page.go("/sign-up")
 
       elif index == 2:
          launch_help(e)
+
+      elif index == 3:
+         page.go("/")
       
       else:
          pass
 
+
    def notify(msg):
+      
       dlg = ft.AlertDialog(
-         title=ft.Text(msg)
+         title=ft.Row(
+            [
+               ft.Icon(name=ft.icons.INFO, color=ft.colors.AMBER_500),
+               ft.Text(msg, size="13", text_align="center"),
+            ]
+      )
       )
       page.dialog = dlg
       dlg.open = True
@@ -42,9 +67,9 @@ def main(page: ft.Page):
                      "/",
                      [
                         ft.AppBar(
-                              leading=ft.Icon(ft.icons.STYLE),
-                              title=ft.Text("Shop Owner"),
-                              bgcolor=ft.colors.AMBER_100,
+                              leading=ft.Icon(ft.icons.STORE),
+                       
+                              bgcolor=ft.colors.AMBER,
                            ),
 
                            #ft.SafeArea(ft.Switch(label="Dark Theme Mode", on_change=switch_theme_mode)),
@@ -58,13 +83,13 @@ def main(page: ft.Page):
                            ),
                            ft.Container(height=5),
 
-                           ft.Text("Find Credible Shops Near You.", weight="bold", theme_style="titleLarge"),
-                           ft.Text("Explore recommended Shops that are in close prximity to you. Find trusted shops and discover what's new! ", text_align="center"),
+                           ft.Text("Discover Shops Near You.", weight="bold", theme_style="titleLarge", color=ft.colors.GREY_700),
+                           ft.Text("Explore recommended Shops that are in close prximity to you.", text_align="center", color=ft.colors.GREY),
 
                            ft.Container(height=5),
                            ft.ElevatedButton("I'm a buyer", bgcolor="#FFC100", color="#161515", width="200", height="50", on_click=lambda _: page.go("/dash")),
                            ft.Container(height=2),
-                           ft.ElevatedButton("I'm' a shop owner", bgcolor="#161515", color="#FFC100", width="200", height="50", on_click=lambda _: page.go("/sign-up")),
+                           ft.ElevatedButton("I'm' a shop owner", bgcolor=ft.colors.GREY_800, color="#FFC100", width="200", height="50", on_click=lambda _: page.go("/sign-up")),
                            ft.Container(height=10),
                      ],
 
@@ -79,36 +104,41 @@ def main(page: ft.Page):
       if page.route == "/dash":
          
 
-         def service_card(item_id, image, text, text2, market, category):
+         def service_card(item_id, image, image_type, text, text2, market, category):
 
             def handle_detail(e):
                page.session.set("shop_id", item_id)
-
                page.go("/detail")
 
-            col1 = ft.Image(src=image, width=150, fit=ft.ImageFit.CONTAIN, border_radius=ft.border_radius.all(5))
+            if image_type == "64":
+               col1 = ft.Image(src_base64=image, width=150, fit=ft.ImageFit.CONTAIN, border_radius=ft.border_radius.all(5))
+            
+            else:
+               col1 = ft.Image(src=image, width=150, fit=ft.ImageFit.CONTAIN, border_radius=ft.border_radius.all(5))
+
             col2 = ft.Column([
-                        ft.Text(text, size=16, weight=ft.FontWeight.BOLD),
-                        ft.Text(text2, size=10, color="grey600"),
-                        ft.TextButton(
-                              market,
-                              icon="SHOP",
-                              icon_color="AMBER",
-                              on_click=handle_detail
+                        ft.Container(height=8),
+                        ft.Text(text, size=16, weight=ft.FontWeight.BOLD, color="grey800"),
+                        ft.Text(text2, size=11, color="grey600"),
+                        ft.Row(
+                              [
+                                 ft.Icon(name=ft.icons.STOREFRONT_OUTLINED, color=ft.colors.AMBER_500),
+                                 ft.Text(market, size=11, color="grey600"),
+                              ]
                         ),
-                        ft.TextButton(
-                              category,
-                              icon="STOREFRONT",
-                              icon_color="AMBER",
-                              on_click=handle_detail
+                        ft.Row(
+                              [
+                                 ft.Icon(name=ft.icons.SUBJECT, color=ft.colors.AMBER),
+                                 ft.Text(category, size=11, color="grey600"),
+                              ]
                         ),
                   
-            ])
+                  ])
 
             #page.session.set("shop_id", item_id)
             
             service_card = ft.Card(
-                  color="rgba(255, 255, 255, 1)",
+                  color="AMBER50",
                   elevation=5,
                   width=350,
                   
@@ -140,7 +170,12 @@ def main(page: ft.Page):
                shops = []
             for item in shops:
                   item_id = item["id"]
-                  image = "https://shopowner.app" + item["logo"] + "/"
+                  if item["logo_64"] == "None":
+                     image = "https://shopowner.app" + item["logo"] + "/"
+                     image_type = "not_64"
+                  else:
+                     image = item["logo_64"]
+                     image_type = "64"
 
                   #image = "https://shopowner.app/media/account_files/logos/Alaba-Rago-Market.jpg/"
                   #image = "https://dominuskelvin.dev/koo"
@@ -151,7 +186,7 @@ def main(page: ft.Page):
                   category = item["category"]
                   items.append(
                      ft.Container(
-                        content=ft.Row([service_card(item_id, image, name, description, market, category)], alignment="center"),
+                        content=ft.Row([service_card(item_id, image, image_type, name, description, market, category)], alignment="center"),
                         alignment=ft.alignment.center,
                         width=400,
                         border_radius=ft.border_radius.all(5),
@@ -165,13 +200,21 @@ def main(page: ft.Page):
                "/dash",
                [
                      ft.AppBar(
-                        leading=ft.Icon(ft.icons.STYLE),
-                        title=ft.Text("Shop Owner"),
-                        bgcolor=ft.colors.AMBER_100,
+                        leading=ft.Icon(ft.icons.STORE),
+                        
+                        bgcolor=ft.colors.AMBER,
                      ),
 
-                     ft.Container(height=10),
-
+                     ft.Container(height=1),
+                     ft.Row(
+                              [
+                                 ft.Icon(name=ft.icons.ARROW_DROP_DOWN_CIRCLE, color=ft.colors.AMBER),
+                                 ft.Text("All shops", size=18, color="grey600"),
+                                 ft.Text("                                         "),
+                                 ft.Icon(name=ft.icons.MORE_VERT)
+                              ]
+                        ),
+                     ft.Container(height=1),
                      ft.Column(spacing=0, controls=items()),
 
                      #ft.ElevatedButton("Get Started", bgcolor="#FFC100", color="#161515", width="200", height="50", on_click=lambda _: page.go("/sign-up")),
@@ -183,8 +226,9 @@ def main(page: ft.Page):
                         on_change=changetab,
                         destinations=[
                            ft.NavigationDestination(icon=ft.icons.HOME, label="Home"),
-                           ft.NavigationDestination(icon=ft.icons.APP_BLOCKING_ROUNDED, label="My Business"),
-                           ft.NavigationDestination(icon=ft.icons.HEADPHONES, label="Help"), 
+                           ft.NavigationDestination(icon=ft.icons.BUSINESS_CENTER, label="My Business"),
+                           ft.NavigationDestination(icon=ft.icons.HELP, label="Help"), 
+                           ft.NavigationDestination(icon=ft.icons.LOGOUT, label="Logout"), 
                         ]
                      ),
                      ft.Container(height=10),
@@ -219,27 +263,27 @@ def main(page: ft.Page):
                else:
                   #import json
                   headers = {"Content-Type": "application/json; charset=utf-8"}
-                  req = requests.get(url="https://shopowner.app/api/sign-in/%s/%s/" % (emaill.value, passwordd.value)).json()
-                  print(emaill.value, passwordd.value)
-                  if req != "Invalid login":
-                     pass
+                  try:
+                     req = requests.get(url="https://shopowner.app/api/sign-in/%s/%s/" % (emaill.value, passwordd.value)).json()
+                  except:
+                     notify("Invalid login!")
+                  if req["status"] == True:
+                     print(" ")
+                     print(" ")
+                     print(" ")
+                     print("-----⏳")
+                     print("-----⏳")
+                     print("-----⏳")
+                     print("-----😃----- ✅✅✅✅✅✅✅✅✅✅✅✅ .....")
+                     print("-----🤯----- The sign in request response is: %s ....." % req)
+                     page.session.set("id", req["id"])
+
+                     page.go("/dash")
+                     page.update()
+
                   else:
                      notify("Invalid login!")
-                  #req = json.loads(req)
-                  #print(req)
                   
-                  #print(req["status"])
-                  #if req:
-                  #     ft.AlertDialog(
-                  #        title=ft.Text("Hey there!"), on_dismiss=lambda e: print("Close")
-                  #    )
-                        
-                  #else:
-                  print(req)
-                  page.session.set("id", req["id"])
-
-                  page.go("/dash")
-                  page.update()
                
             back = ft.IconButton(
                icon=ft.icons.ARROW_BACK_IOS, on_click=lambda _: page.go("/")
@@ -330,7 +374,14 @@ def main(page: ft.Page):
                   #    )
                         
                   #else:
-                  print(req)
+                  print(" ")
+                  print(" ")
+                  print(" ")
+                  print("-----⏳")
+                  print("-----⏳")
+                  print("-----⏳")
+                  print("-----😃----- ✅✅✅✅✅✅✅✅✅✅✅✅ .....")
+                  print("-----🤯----- The sign in request response is: %s ....." % req)
                   page.session.set("id", req["id"])
 
                   page.go("/sign-up-finish")
@@ -360,8 +411,8 @@ def main(page: ft.Page):
                            fit=ft.ImageFit.CONTAIN,
                         ),
                         ft.Container(height=5),
-                        ft.Text("Create an account", weight="bold", theme_style="titleLarge"),
-                        ft.Text("Begin your journey to increasing online visibility.", text_align="center"),
+                        ft.Text("Create an account", weight="bold", theme_style="titleLarge", color=ft.colors.GREY_700),
+                        ft.Text("Begin your journey to increasing online visibility.", text_align="center", color=ft.colors.GREY),
 
                         ft.Container(height=5),
                         email,
@@ -403,9 +454,16 @@ def main(page: ft.Page):
 
                markets = []
                for item in req["markets"]:
-                     print(item["id"], item["name"])
                      page.session.set("%s" % item["name"], "%s" % item["id"])
-                     print(page.session.get("%s" % item["name"]))
+                     print(" ")
+                     print(" ")
+                     print(" ")
+                     print("-----⏳")
+                     print("-----⏳")
+                     print("-----⏳")
+                     print("-----😃----- ✅✅✅✅✅✅✅✅✅✅✅✅ .....")
+                     print("-----🤯----- Market and Category saved: %s ....." % page.session.get("%s" % item["name"]))
+                     
                      market = ft.dropdown.Option(item["name"])
                      markets.append(market)
 
@@ -431,8 +489,14 @@ def main(page: ft.Page):
                
                else:
                   req = requests.post("https://shopowner.app/api/add/1/", data={"app_id":page.session.get("id"), "market":dd.value})
-                  print("the compiler is here.....")
-                  #print(page.session.get("%s" % dd.value))
+                  print(" ")
+                  print(" ")
+                  print(" ")
+                  print("-----⏳")
+                  print("-----⏳")
+                  print("-----⏳")
+                  print("-----😃----- ✅✅✅✅✅✅✅✅✅✅✅✅ .....")
+                  print("-----🤯----- The compiler got to handle_signup_finish .....")
                   page.session.set("market_id", dd.value)
                   page.go("/sign-up-close")
                   #page.go(f"/sign-up-close/%s" % str(page.session.get("%s" % dd.value)))
@@ -461,8 +525,8 @@ def main(page: ft.Page):
                            fit=ft.ImageFit.CONTAIN,
                         ),
                         ft.Container(height=10),
-                        ft.Text("Choose Market Category", weight="bold", theme_style="titleLarge"),
-                        ft.Text("Help customer find you easily on Shop Owner.", text_align="center"),
+                        ft.Text("Choose Market Category", weight="bold", theme_style="titleLarge", color=ft.colors.GREY_700),
+                        ft.Text("Help customer find you easily on Shop Owner.", text_align="center", color=ft.colors.GREY),
 
                         ft.Container(height=10),
                         dd,
@@ -508,7 +572,15 @@ def main(page: ft.Page):
 
          market = page.session.get("market_id")
          market_id = page.session.get("%s" % market)
-         print("This market id is %s" % market_id)
+         print(" ")
+         print(" ")
+         print(" ")
+         print("-----⏳")
+         print("-----⏳")
+         print("-----⏳")
+         print("-----😃----- ✅✅✅✅✅✅✅✅✅✅✅✅ .....")
+         print("-----🤯----- Saved marketing id to session (%s) ....." % market_id)
+         
          #market_id = page.route[15:]
          categorys = get_categorys(market_id)
                      
@@ -544,8 +616,8 @@ def main(page: ft.Page):
                         fit=ft.ImageFit.CONTAIN,
                      ),
                      ft.Container(height=10),
-                     ft.Text("Choose Sub Category", weight="bold", theme_style="titleLarge"),
-                     ft.Text("Maintaining a niche of your own and remain unique.", text_align="center"),
+                     ft.Text("Choose Sub Category", weight="bold", theme_style="titleLarge", color=ft.colors.GREY_700),
+                     ft.Text("Maintaining a niche of your own and remain unique.", text_align="center", color=ft.colors.GREY),
 
                      ft.Container(height=10),
                      cat, 
@@ -585,24 +657,146 @@ def main(page: ft.Page):
                   prefix_icon=ft.icons.LOCATION_ON
             )
 
-         def on_dialog_result(e: ft.FilePickerResultEvent):
-            print("Selected files:", e.files)
-            print("Selected file or directory:", e.path)
+         def pick_files_result(e: ft.FilePickerResultEvent):
+            selected_files = e.files
+            #print(selected_files[0])
+            #selected_files = (
+            #      ", ".join(map(lambda f: f.path, e.files)) if e.files else "Cancelled!"
+            #)
+            print(" ")
+            print(" ")
+            print(" ")
+            print("-----⏳")
+            print("-----⏳")
+            print("-----⏳")
+            print("-----😃----- ✅✅✅✅✅✅✅✅✅✅✅✅ .....")
+            print("-----🤯----- The selected_files path is: %s " % selected_files)
 
-         file_picker = ft.FilePicker(on_result=on_dialog_result)
+            page.session.set("selected_files", selected_files)
+
+         file_picker = ft.FilePicker(on_result=pick_files_result)
          page.overlay.append(file_picker)
+
+         #####multiple files
+         def pick_files_result2(e: ft.FilePickerResultEvent):
+            selected_files2 = e.files
+            print("-----🤯----- The selected_files path is: %s " % selected_files2)
+
+            page.session.set("selected_files2", selected_files2)
+
+         file_picker2 = ft.FilePicker(on_result=pick_files_result2)
+         page.overlay.append(file_picker2)
+
 
 
 
          def handle_add_shop(e):
-            req = requests.get("https://shopowner.app/api/add-shop/%s/%s/%s/%s/%s/" % (page.session.get("id"), name.value, description.value, phone.value, map_link.value)).json()
-            print(req)
-            print({"app_id":page.session.get("id"), "name":name.value, "description":description.value, "phone":phone.value, "map_link":map_link.value})
-            if req == "Success!":
-               page.go("/dash")
+            selected_files = page.session.get("selected_files")
+            selected_files2 = page.session.get("selected_files2")
+
+            print("Printing the other images:", selected_files2)
+
+            name.error_text = ""
+            description.error_text = ""
+            phone.error_text = ""
+            map_link.error_text = ""
+            if not name.value:
+               name.error_text = "missing email..."
                page.update()
+            elif not description.value:
+               description.error_text = "missing password..."
+               page.update()
+            elif not phone.value:
+               phone.error_text = "missing password..."
+               page.update()
+            elif not map_link.value:
+               map_link.error_text = "missing password..."
+               page.update()
+
             else:
-               notify("An error occurred.")
+
+               ###new code
+               try:
+                  import base64
+                  with open(selected_files[0].path, 'rb') as file:
+                     logo_file = base64.b64encode(file.read()).decode("utf-8")
+               except:
+                  logo_file = None
+
+               other_images = []
+               for item in selected_files2:
+                  with open(item.path, 'rb') as file:
+                     item_file = base64.b64encode(file.read()).decode("utf-8")
+                     other_images.append(item_file)
+
+               try:
+                  other_images[0]
+               except:
+                  other_images[0] = None
+
+               try:
+                  other_images[1]
+               except:
+                  other_images[1] = None
+
+               try:
+                  other_images[2]
+               except:
+                  other_images.append(None)
+               
+               try:
+                  other_images[3]
+               except:
+                  other_images.append(None)
+
+               try:
+                  other_images[4]
+               except:
+                  other_images.append(None)
+
+               print(other_images)
+            
+               import urllib.request
+               import urllib.parse
+               import json
+
+               
+
+               data = {'logo_64': logo_file, 'image1_64': other_images[0], 'image2_64': other_images[1], 
+                       'image3_64': other_images[2], 'image4_64': other_images[3], "app_id":page.session.get("id"), "name":name.value, 
+                       "description":description.value, "phone":phone.value, "map_link":map_link.value
+                       }
+               
+               encoded_data = urllib.parse.urlencode(data).encode('utf-8')
+               request = urllib.request.Request("https://shopowner.app/api/add-shop/post/", data=encoded_data)
+               
+               print(" ")
+               print(" ")
+               print(" ")
+               print("-----⏳")
+               print("-----⏳")
+               print("-----⏳")
+               print("-----😃----- ✅✅✅✅✅✅✅✅✅✅✅✅ .....")
+               print("-----🤯----- The handle_add_shop request reponse is (%s) ....." % request)
+
+               with urllib.request.urlopen(request) as response:
+                  if response.getcode() == 200:
+                     req = "Success!"
+                     response_data = response.read()
+                     json_response = json.loads(response_data)
+                     print("JSON Response:", json_response)
+
+                  else:
+                     req = None
+
+               ###end of new code
+
+               if req == "Success!":
+                  page.go("/dash")
+                  page.update()
+
+               else:
+                  notify("An error occurred.")
 
 
          back = ft.IconButton(
@@ -618,8 +812,8 @@ def main(page: ft.Page):
                            alignment=ft.alignment.top_left,
                         ),
                         
-                     ft.Text("Register your Shop", weight="bold", theme_style="titleLarge"),
-                     ft.Text("Get listed on Shop Owner for more online visibility for your Shop.", text_align="center"),
+                     ft.Text("Register your Shop", weight="bold", theme_style="titleLarge", color=ft.colors.GREY_700),
+                     ft.Text("Get listed on Shop Owner for more online visibility for your Shop.", text_align="center", color=ft.colors.GREY),
 
                      ft.Container(height=5),
                      name, 
@@ -630,9 +824,10 @@ def main(page: ft.Page):
                      ft.Container(height=5),
                      map_link,
                      ft.Container(height=5),
+                     ft.Text("Upload a logo and few(4) images for your product/service/shop.", text_align="center", color=ft.colors.GREY_700, size="9"),
                      ft.Row([
-                           ft.ElevatedButton("Upload Logo", on_click=lambda _: file_picker.pick_files()), 
-                           ft.ElevatedButton("Upload Images", on_click=lambda _: file_picker.pick_files())
+                           ft.ElevatedButton("Logo", on_click=lambda _: file_picker.pick_files()), 
+                           ft.ElevatedButton("Images", on_click=lambda _: file_picker2.pick_files(allow_multiple=True))
                         ], alignment="center"),
                      
                      ft.Container(height=5),
@@ -656,10 +851,11 @@ def main(page: ft.Page):
 
 
       #####################
+      #####################
       if page.route == "/manage-my-shop":
-         name = ft.TextField(label="Edit Name", width=300, height=50, border_radius=15, prefix_icon=ft.icons.BUSINESS_CENTER)
+         name = ft.TextField(label="Business Name", width=300, height=50, border_radius=15, prefix_icon=ft.icons.BUSINESS_CENTER)
          description = ft.TextField(
-                  label="Edit About Business",
+                  label="About your Business",
                   multiline=True,
                   min_lines=1,
                   max_lines=3,
@@ -668,27 +864,170 @@ def main(page: ft.Page):
             )
          phone = ft.TextField(label="Phone Number", width=300, height=50, border_radius=15, prefix_icon=ft.icons.LOCAL_PHONE)
          map_link = ft.TextField(
-                  label="Edit Google map link",
+                  label="Shop Address",
                   multiline=True,
                   min_lines=1,
                   max_lines=3,
                   width=300, border_radius=15, 
                   prefix_icon=ft.icons.LOCATION_ON
             )
+         
+         def handle_shop(id):
+            print("handling shop")
+            shop = requests.get(f"https://shopowner.app/api/detail/%s" % (id)).json()
+            print(shop)
+            return shop
 
-         def on_dialog_result(e: ft.FilePickerResultEvent):
-            print("Selected files:", e.files)
-            print("Selected file or directory:", e.path)
+         shop_id = page.session.get("id")
 
-         file_picker = ft.FilePicker(on_result=on_dialog_result)
+         #shop_id = page.route[8:]
+         shop = handle_shop(shop_id)
+         
+         name.value = shop["name"]
+         description.value = shop["description"]
+         phone.value = shop["phone"]
+         map_link.value = shop["google_map"]
+
+         def pick_files_result(e: ft.FilePickerResultEvent):
+            selected_files = e.files
+            #print(selected_files[0])
+            #selected_files = (
+            #      ", ".join(map(lambda f: f.path, e.files)) if e.files else "Cancelled!"
+            #)
+            print(" ")
+            print(" ")
+            print(" ")
+            print("-----⏳")
+            print("-----⏳")
+            print("-----⏳")
+            print("-----😃----- ✅✅✅✅✅✅✅✅✅✅✅✅ .....")
+            print("-----🤯----- The selected_files path is: %s " % selected_files)
+
+            page.session.set("selected_files", selected_files)
+
+         file_picker = ft.FilePicker(on_result=pick_files_result)
          page.overlay.append(file_picker)
 
+         #####multiple files
+         def pick_files_result2(e: ft.FilePickerResultEvent):
+            selected_files2 = e.files
+            print("-----🤯----- The selected_files path is: %s " % selected_files2)
+
+            page.session.set("selected_files2", selected_files2)
+
+         file_picker2 = ft.FilePicker(on_result=pick_files_result2)
+         page.overlay.append(file_picker2)
 
 
-         def handle_add_shop(e):
-            req = requests.post("https://shopowner.app/api/add/2/", data={"app_id":page.session.get("id"), "category":cat.value})
-            page.go("/dash")
-            page.update()
+
+
+         def handle_manage_shop(e):
+            selected_files = page.session.get("selected_files")
+            selected_files2 = page.session.get("selected_files2")
+
+            print("Printing the other images:", selected_files2)
+
+            name.error_text = ""
+            description.error_text = ""
+            phone.error_text = ""
+            map_link.error_text = ""
+            if not name.value:
+               name.error_text = "missing email..."
+               page.update()
+            elif not description.value:
+               description.error_text = "missing password..."
+               page.update()
+            elif not phone.value:
+               phone.error_text = "missing password..."
+               page.update()
+            elif not map_link.value:
+               map_link.error_text = "missing password..."
+               page.update()
+
+            else:
+
+               ###new code
+               try:
+                  import base64
+                  with open(selected_files[0].path, 'rb') as file:
+                     logo_file = base64.b64encode(file.read()).decode("utf-8")
+               except:
+                  logo_file = None
+
+               other_images = []
+               for item in selected_files2:
+                  with open(item.path, 'rb') as file:
+                     item_file = base64.b64encode(file.read()).decode("utf-8")
+                     other_images.append(item_file)
+
+               try:
+                  other_images[0]
+               except:
+                  other_images[0] = None
+
+               try:
+                  other_images[1]
+               except:
+                  other_images[1] = None
+
+               try:
+                  other_images[2]
+               except:
+                  other_images.append(None)
+               
+               try:
+                  other_images[3]
+               except:
+                  other_images.append(None)
+
+               try:
+                  other_images[4]
+               except:
+                  other_images.append(None)
+
+               print(other_images)
+            
+               import urllib.request
+               import urllib.parse
+               import json
+
+               
+
+               data = {'logo_64': logo_file, 'image1_64': other_images[0], 'image2_64': other_images[1], 
+                       'image3_64': other_images[2], 'image4_64': other_images[3], "app_id":page.session.get("id"), "name":name.value, 
+                       "description":description.value, "phone":phone.value, "map_link":map_link.value
+                       }
+               
+               encoded_data = urllib.parse.urlencode(data).encode('utf-8')
+               request = urllib.request.Request("https://shopowner.app/api/add-shop/post/", data=encoded_data)
+               
+               print(" ")
+               print(" ")
+               print(" ")
+               print("-----⏳")
+               print("-----⏳")
+               print("-----⏳")
+               print("-----😃----- ✅✅✅✅✅✅✅✅✅✅✅✅ .....")
+               print("-----🤯----- The handle_add_shop request reponse is (%s) ....." % request)
+
+               with urllib.request.urlopen(request) as response:
+                  if response.getcode() == 200:
+                     req = "Success!"
+                     response_data = response.read()
+                     json_response = json.loads(response_data)
+                     print("JSON Response:", json_response)
+
+                  else:
+                     req = None
+
+               ###end of new code
+
+               if req == "Success!":
+                  page.go("/dash")
+                  page.update()
+
+               else:
+                  notify("An error occurred.")
 
 
          back = ft.IconButton(
@@ -703,7 +1042,10 @@ def main(page: ft.Page):
                            content=back,
                            alignment=ft.alignment.top_left,
                         ),
-                     ft.Text("Manage my Shop", weight="bold", theme_style="titleLarge"),
+                        
+                     ft.Text("Edit your Shop", weight="bold", theme_style="titleLarge", color=ft.colors.GREY_700),
+                     ft.Text("Make changes to your account.", text_align="center", color=ft.colors.GREY),
+
                      ft.Container(height=5),
                      name, 
                      ft.Container(height=5),
@@ -713,13 +1055,14 @@ def main(page: ft.Page):
                      ft.Container(height=5),
                      map_link,
                      ft.Container(height=5),
+                     ft.Text("(Optional) Upload a logo or Images.", text_align="center", color=ft.colors.GREY_700, size="9"),
                      ft.Row([
-                           ft.ElevatedButton("Upload Logo", on_click=lambda _: file_picker.pick_files()), 
-                           ft.ElevatedButton("Upload Images", on_click=lambda _: file_picker.pick_files())
+                           ft.ElevatedButton("Logo", on_click=lambda _: file_picker.pick_files()), 
+                           ft.ElevatedButton("Images", on_click=lambda _: file_picker2.pick_files(allow_multiple=True))
                         ], alignment="center"),
                      
                      ft.Container(height=5),
-                     ft.ElevatedButton("Save", bgcolor="#FFC100", color="#161515", width="200", height="50", on_click=handle_add_shop),
+                     ft.ElevatedButton("Update", bgcolor="#FFC100", color="#161515", width="200", height="50", on_click=handle_manage_shop),
                      
                      ft.Container(height=10),
                   ],
@@ -731,6 +1074,7 @@ def main(page: ft.Page):
                )
          )
       page.update()
+      #####################
       #####################
 
 
@@ -765,19 +1109,27 @@ def main(page: ft.Page):
          #shop_id = page.route[8:]
          shop = handle_shop(shop_id)
 
+
          def launch_direction(e):
             #page.launch_url(shop["google_map"])
-            page.launch_url("https://wa.me/+23490875678")
+            page.launch_url(shop["locator"])
 
          bs = ft.BottomSheet(
             ft.Container(
                content=ft.Column(
                   [  
                      ft.Container(height=25),  
-                     ft.Text("Get Directions.", weight="bold", theme_style="titleLarge"),
-                     ft.Text("Easily locate your way to this Shop by clicking.", text_align="center"),
+                     ft.Row(
+                              [  
+                                 ft.Text("Location", weight="bold", theme_style="titleLarge", color=ft.colors.GREY_700),
+                                 ft.Icon(name=ft.icons.LOCATION_ON, color=ft.colors.AMBER_500),
+                                 
+                              ]
+                        ),
+                     
+                     ft.Text(shop["google_map"], text_align="center", color=ft.colors.GREY),
                      ft.Container(height=5),  
-                     ft.ElevatedButton("Get Direction", bgcolor="#FFC100", color="#161515", width="200", height="50", on_click=launch_direction),
+                     ft.ElevatedButton("Launch Map", bgcolor="#FFC100", color="#161515", width="200", height="50", on_click=launch_direction),
                      
                   ], 
                
@@ -794,32 +1146,16 @@ def main(page: ft.Page):
          back = ft.IconButton(
                      icon=ft.icons.ARROW_BACK_IOS, on_click=lambda _: page.go("/dash")
                   )
-         page.views.append(
-            ft.View(
-               "/detail",
-               [
-                     ft.Container(
-                           content=back,
-                           alignment=ft.alignment.top_left,
-                        ),
-
-                     
-
-
-                     ft.Container(
+         
+         if shop["logo_64"] == "None":
+            header = ft.Container(
                         image_src="https://shopowner.app" + shop["logo"] + "/",
                         image_fit="cover",
                         height=150,
                         border_radius=5,
                         padding=0,
-                     ),
-               
-
-
-                     ft.Container(height=1),  
-
-                     ft.Row(scroll="always", 
-                        controls=[
+                     )
+            image_controls = [
                            ft.Image(
                                     src="https://shopowner.app" + shop["image1"] +"/",
                                     width=55,
@@ -851,16 +1187,81 @@ def main(page: ft.Page):
                                     border_radius=ft.border_radius.all(15),
                                  ),    
 
-                        ]
+            ]
+
+            
+         else:
+            header = ft.Container(
+                        image_src_base64=shop["logo_64"],
+                        image_fit="cover",
+                        height=150,
+                        border_radius=5,
+                        padding=0,
+                     )
+         
+            image_controls = [
+                           ft.Image(
+                                    src_base64=shop["image1_64"],
+                                    width=55,
+                                    height=55,
+                                    fit=ft.ImageFit.CONTAIN,
+                                    border_radius=ft.border_radius.all(15),
+                                 ),
+
+                           ft.Image(
+                                    src_base64=shop["image2_64"],
+                                    width=55,
+                                    height=55,
+                                    fit=ft.ImageFit.CONTAIN,
+                                    border_radius=ft.border_radius.all(15),
+                                 ),   
+                           ft.Image(
+                                    src_base64=shop["image3_64"],
+                                    width=55,
+                                    height=55,
+                                    fit=ft.ImageFit.CONTAIN,
+                                    border_radius=ft.border_radius.all(15),
+                                 ),   
+
+                           ft.Image(
+                                    src_base64=shop["image4_64"],
+                                    width=55,
+                                    height=55,
+                                    fit=ft.ImageFit.CONTAIN,
+                                    border_radius=ft.border_radius.all(15),
+                                 ),    
+
+            ]
+            
+         page.views.append(
+            ft.View(
+               "/detail",
+               [
+                     ft.Container(
+                           content=back,
+                           alignment=ft.alignment.top_left,
+                        ),
+
+                     
+
+
+                     header,
+               
+
+
+                     ft.Container(height=1),  
+
+                     ft.Row(scroll="always", 
+                        controls=image_controls
                      ),
                      
 
                      ft.Container(height=10),
 
-                     ft.Text(shop["name"], weight="bold", theme_style="titleLarge"),
+                     ft.Text(shop["name"], weight="bold", theme_style="titleLarge", color=ft.colors.GREY_700),
                      ft.Row(controls=[ft.Icon(ft.icons.STAR, color=ft.colors.YELLOW_600), ft.Icon(ft.icons.STAR, color=ft.colors.YELLOW_600), ft.Icon(ft.icons.STAR, color=ft.colors.YELLOW_600)], alignment="center", ),
                      
-                     ft.Text(shop["description"], text_align="center", width=350),
+                     ft.Text(shop["description"], text_align="center", width=350, color=ft.colors.GREY),
                      ft.Container(height=1),
                      ft.ElevatedButton("Get Direction", bgcolor="#FFC100", color="#161515", width="200", height="50", on_click=handle_show_bs),
 
@@ -885,8 +1286,9 @@ def main(page: ft.Page):
                         on_change=changetab,
                         destinations=[
                            ft.NavigationDestination(icon=ft.icons.HOME, label="Home"),
-                           ft.NavigationDestination(icon=ft.icons.APP_BLOCKING_ROUNDED, label="My Business"),
-                           ft.NavigationDestination(icon=ft.icons.HEADPHONES, label="Help"), 
+                           ft.NavigationDestination(icon=ft.icons.BUSINESS_CENTER, label="My Business"),
+                           ft.NavigationDestination(icon=ft.icons.HELP, label="Help"), 
+                           ft.NavigationDestination(icon=ft.icons.LOGOUT, label="Logout"), 
                         ]
                      ),
                      ft.Container(height=10),
