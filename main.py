@@ -13,6 +13,10 @@ def main(page: ft.Page):
       #page.launch_url(shop["google_map"])
       page.launch_url("https://wa.me/+2348148737265")
 
+   def launch_subscribe(e):
+      #page.launch_url(shop["google_map"])
+      page.launch_url("https://shopowner.app/pay/")
+
    def changetab(e):
       index = e.control.selected_index
       print(" ")
@@ -37,6 +41,9 @@ def main(page: ft.Page):
          launch_help(e)
 
       elif index == 3:
+         launch_subscribe(e)
+
+      elif index == 4:
          page.go("/")
       
       else:
@@ -84,7 +91,7 @@ def main(page: ft.Page):
                            ft.Container(height=5),
 
                            ft.Text("Discover Shops Near You.", weight="bold", theme_style="titleLarge", color=ft.colors.GREY_700),
-                           ft.Text("Explore recommended Shops that are in close prximity to you.", text_align="center", color=ft.colors.GREY),
+                           ft.Text("Explore recommended Shops that are in close proximity to you.", text_align="center", color=ft.colors.GREY),
 
                            ft.Container(height=5),
                            ft.ElevatedButton("I'm a buyer", bgcolor="#FFC100", color="#161515", width="200", height="50", on_click=lambda _: page.go("/dash")),
@@ -226,8 +233,9 @@ def main(page: ft.Page):
                         on_change=changetab,
                         destinations=[
                            ft.NavigationDestination(icon=ft.icons.HOME, label="Home"),
-                           ft.NavigationDestination(icon=ft.icons.BUSINESS_CENTER, label="My Business"),
+                           ft.NavigationDestination(icon=ft.icons.BUSINESS_CENTER, label="profile"),
                            ft.NavigationDestination(icon=ft.icons.HELP, label="Help"), 
+                           ft.NavigationDestination(icon=ft.icons.PAYMENT, label="Subscribe"), 
                            ft.NavigationDestination(icon=ft.icons.LOGOUT, label="Logout"), 
                         ]
                      ),
@@ -1112,7 +1120,7 @@ def main(page: ft.Page):
 
          def launch_direction(e):
             #page.launch_url(shop["google_map"])
-            page.launch_url(shop["locator"])
+            page.launch_url("https://shopowner.app/map/" + str(shop["id"]) + "/")
 
          bs = ft.BottomSheet(
             ft.Container(
@@ -1128,7 +1136,14 @@ def main(page: ft.Page):
                         ),
                      
                      ft.Text(shop["google_map"], text_align="center", color=ft.colors.GREY),
-                     ft.Container(height=5),  
+                     ft.Container(height=5),
+                     ft.WebView(
+                        "https://shopowner.app/map/" + str(shop["id"]) + "/",
+                        expand=True,
+                        on_page_started=lambda _: print("Page started"),
+                        on_page_ended=lambda _: print("Page ended"),
+                        on_web_resource_error=lambda e: print("Page error:", e.data),
+                     ),
                      ft.ElevatedButton("Launch Map", bgcolor="#FFC100", color="#161515", width="200", height="50", on_click=launch_direction),
                      
                   ], 
@@ -1286,8 +1301,9 @@ def main(page: ft.Page):
                         on_change=changetab,
                         destinations=[
                            ft.NavigationDestination(icon=ft.icons.HOME, label="Home"),
-                           ft.NavigationDestination(icon=ft.icons.BUSINESS_CENTER, label="My Business"),
+                           ft.NavigationDestination(icon=ft.icons.BUSINESS_CENTER, label="Profile"),
                            ft.NavigationDestination(icon=ft.icons.HELP, label="Help"), 
+                           ft.NavigationDestination(icon=ft.icons.PAYMENT, label="Subscribe"), 
                            ft.NavigationDestination(icon=ft.icons.LOGOUT, label="Logout"), 
                         ]
                      ),
