@@ -1137,13 +1137,13 @@ def main(page: ft.Page):
                      
                      ft.Text(shop["google_map"], text_align="center", color=ft.colors.GREY),
                      ft.Container(height=5),
-                     ft.WebView(
-                        "https://shopowner.app/map/" + str(shop["id"]) + "/",
-                        expand=True,
-                        on_page_started=lambda _: print("Page started"),
-                        on_page_ended=lambda _: print("Page ended"),
-                        on_web_resource_error=lambda e: print("Page error:", e.data),
-                     ),
+                     #ft.WebView(
+                     #   "https://shopowner.app/map/" + str(shop["id"]) + "/",
+                     #   expand=True,
+                     #   on_page_started=lambda _: print("Page started"),
+                     #   on_page_ended=lambda _: print("Page ended"),
+                     #   on_web_resource_error=lambda e: print("Page error:", e.data),
+                     #),
                      ft.ElevatedButton("Launch Map", bgcolor="#FFC100", color="#161515", width="200", height="50", on_click=launch_direction),
                      
                   ], 
